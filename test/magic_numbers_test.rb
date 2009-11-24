@@ -4,8 +4,8 @@ setup_db
 
 class Foo < ActiveRecord::Base
 
-  enum_column     :state, :values => [:active, :pending, :passive, :deleted]
-  bitfield_column :roles, :values => [:user, :administrator, :moderator]
+  enum_attribute     :state, :values => [:active, :pending, :passive, :deleted]
+  bitfield_attribute :roles, :values => [:user, :administrator, :moderator]
 
 end
 
@@ -16,7 +16,7 @@ class MagicNumbersTest < ActiveSupport::TestCase
                    :roles => [:administrator, :user])
   end
 
-  test "should correctly handle enum and bitfield columns" do
+  test "should correctly handle enum and bitfield attributes" do
     assert @foo.save
     assert_equal 2, @foo[:state]
     assert_equal 3, @foo[:roles]
@@ -32,7 +32,7 @@ class MagicNumbersTest < ActiveSupport::TestCase
     assert_equal [:user, :administrator], @foo.roles
   end
 
-  test "should preserve values order in bitfield column" do
+  test "should preserve values order in bitfield attribute" do
     @foo.roles = ['administrator', :moderator, 'user']
     assert_equal [:user, :administrator, :moderator], @foo.roles
   end

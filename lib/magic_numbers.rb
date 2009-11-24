@@ -8,42 +8,42 @@ module ActiveRecord
 
     module ClassMethods
 
-      def enum_column(name, options = {})
-        magic_number_column(name, options.merge({ :type => :enum }))
+      def enum_attribute(name, options = {})
+        magic_number_attribute(name, options.merge({ :type => :enum }))
       end
 
-      def bitfield_column(name, options = {})
-        magic_number_column(name, options.merge({ :type => :bitfield }))
+      def bitfield_attribute(name, options = {})
+        magic_number_attribute(name, options.merge({ :type => :bitfield }))
       end
 
       def magic_number_for(name, value)
         return nil if value.nil?
-        column_options = magic_number_column_options(name)
+        attribute_options = magic_number_attribute_options(name)
 
-        if column_options[:type] == :bitfield
+        if attribute_options[:type] == :bitfield
           value = value.map do |v|
-            column_options[:stringified_values].include?(v.to_s) ? v.to_s.intern : nil
+            attribute_options[:stringified_values].include?(v.to_s) ? v.to_s.intern : nil
           end.compact.uniq
 
           magic_number = 0
-          value.each { |k| magic_number |= 1 << column_options[:values].index(k) }
+          value.each { |k| magic_number |= 1 << attribute_options[:values].index(k) }
           magic_number
         else
-          if column_options[:stringified_values].include?(value.to_s)
-            column_options[:values].index(value.to_s.intern)
+          if attribute_options[:stringified_values].include?(value.to_s)
+            attribute_options[:values].index(value.to_s.intern)
           else
             nil
           end
         end
       end
 
-      def magic_number_column_options(name)
-        magic_number_columns = read_inheritable_attribute(:magic_number_columns) || {}
+      def magic_number_attribute_options(name)
+        magic_number_attributes = read_inheritable_attribute(:magic_number_attributes) || {}
 
-        if magic_number_columns.include?(name)
-          magic_number_columns[name]
+        if magic_number_attributes.include?(name)
+          magic_number_attributes[name]
         else
-          raise ArgumentError, "Could not find magic number column `#{name}` in class #{self.class.name}"
+          raise ArgumentError, "Could not find magic number attribute `#{name}` in class #{self.class.name}"
         end
       end
 
@@ -56,13 +56,13 @@ module ActiveRecord
         EOE
       end
 
-      def magic_number_column(name, options = {})
-        magic_number_columns = read_inheritable_attribute(:magic_number_columns) || {}
+      def magic_number_attribute(name, options = {})
+        magic_number_attributes = read_inheritable_attribute(:magic_number_attributes) || {}
         options.assert_valid_keys(:values, :type)
 
         options[:stringified_values] = options[:values].map { |v| v.to_s }
-        magic_number_columns[name] = options
-        write_inheritable_attribute(:magic_number_columns, magic_number_columns)
+        magic_number_attributes[name] = options
+        write_inheritable_attribute(:magic_number_attributes, magic_number_attributes)
         magic_number_accessors(name)
       end
 
@@ -71,17 +71,17 @@ module ActiveRecord
     module InstanceMethods
 
       def magic_number_read(name)
-        column_options = self.class.magic_number_column_options(name)
+        attribute_options = self.class.magic_number_attribute_options(name)
 
-        if column_options[:type] == :bitfield
+        if attribute_options[:type] == :bitfield
           unless self[name].nil?
-            column_options[:values].collect { |v| (self[name].to_i & (1 << column_options[:values].index(v))) > 0 ? v : nil }.compact
+            attribute_options[:values].collect { |v| (self[name].to_i & (1 << attribute_options[:values].index(v))) > 0 ? v : nil }.compact
           else
             []
           end
         else
           unless self[name].nil?
-            column_options[:values][self[name]]
+            attribute_options[:values][self[name]]
           else
             nil
           end
@@ -89,7 +89,7 @@ module ActiveRecord
       end
 
       def magic_number_write(name, new_value)
-        column_options = self.class.magic_number_column_options(name)
+        attribute_options = self.class.magic_number_attribute_options(name)
         self[name] = self.class.magic_number_for(name, new_value)
       end
 
