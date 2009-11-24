@@ -1,13 +1,53 @@
-MagicNumbers
-============
+= Introduction
 
-Introduction goes here.
+Magic Numbers is a simple Rails plugin which brings transparent enums
+and sets (bitfields) to AR objects. It doesn't require native database
+support of enums or sets, instead of this it stores values as plain
+integers.
 
+= Example
 
-Example
-=======
+Magic Numbers usage is simple:
 
-Example goes here.
+  class User < ActiveRecord::Base
+    enum_attribute     :state, :values => [:passive, :active, :deleted]
+    bitfield_attribute :roles, :values => [:user, :moderator, :administrator]
+  end
 
+After this you can work with enum attribute with symbols or strings:
 
-Copyright (c) 2009 [name of plugin creator], released under the MIT license
+  @user.state
+  => nil
+
+  @user.state = :active
+  @user.state = 'deleted'
+
+  @user.state
+  => :deleted
+
+And you can work with bitfield attributes as regular arrays:
+
+  @user.roles
+  => nil
+
+  @user.roles = [:user]
+  @user.roles
+  => [:user]
+
+  @user.roles <<= :moderator
+  @user.roles
+  => [:user, :moderator]
+
+= Handling of incorrect values
+
+Magic-numbered columns will handle all incorrect (unspecified) values as +nil+:
+
+  @user.state = 'incorrect state value'
+  @user.state
+  => nil
+
+  @user.roles = [:user, nil, :dancer] # NB :dancer is an incorrect role
+  @user.roles
+  => [:user]
+
+Copyright &copy; 2009 Mikhail Lapshin (sotakone at sotakone dot com), released under the MIT license

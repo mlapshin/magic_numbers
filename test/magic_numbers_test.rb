@@ -43,7 +43,7 @@ class MagicNumbersTest < ActiveSupport::TestCase
   end
 
   test "should correctly report magic numbers for specified values" do
-    assert_equal 3, Foo.magic_number_for(:roles, [:administrator, :user, 'aalsdkajajs'])
+    assert_equal 3, Foo.magic_number_for(:roles, [:administrator, :user, nil, 'aalsdkajajs'])
     assert_equal 0, Foo.magic_number_for(:roles, [])
     assert_equal 1, Foo.magic_number_for(:state, 'pending')
 
