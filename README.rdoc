@@ -14,29 +14,48 @@ Magic Numbers usage is simple:
     bitfield_attribute :roles, :values => [:user, :moderator, :administrator]
   end
 
-After this you can work with enum attribute with symbols or strings:
+After this you can set user's state with symbols or strings:
 
   @user.state
-  => nil
+  # => nil
 
   @user.state = :active
   @user.state = 'deleted'
 
   @user.state
-  => :deleted
+  # => :deleted
+
+  @user[:state]  # In such way we can get value which will actually be written in DB
+  # => 2
 
 And you can work with bitfield attributes as regular arrays:
 
   @user.roles
-  => nil
+  # => nil
 
   @user.roles = [:user]
   @user.roles
-  => [:user]
+  # => [:user]
 
   @user.roles <<= :moderator
   @user.roles
-  => [:user, :moderator]
+  # => [:user, :moderator]
+
+  @user[:roles]
+  # => 3
+
+=  Getting magic numbers for specified values
+
+Sometimes (for example, for search queries) you need magic numbers
+which corresponds to your values. You can use +magic_number_for+
+method, i.e.:
+
+  deleted_users = @user.find(:all, :conditions => { :state => User.magic_number_for(:state, :deleted) })
+
+Also you can get entire magic number attribute options hash by it's name:
+
+  User.magic_number_attribute_options(:state)
+  # => { :type => :enum, :values => [:passive, :active, :deleted], :stringified_values => ["passive", "active", "deleted"] }
 
 = Handling of incorrect values
 
@@ -44,10 +63,14 @@ Magic-numbered columns will handle all incorrect (unspecified) values as +nil+:
 
   @user.state = 'incorrect state value'
   @user.state
-  => nil
+  # => nil
 
   @user.roles = [:user, nil, :dancer] # NB :dancer is an incorrect role
   @user.roles
-  => [:user]
+  # => [:user]
 
-Copyright &copy; 2009 Mikhail Lapshin (sotakone at sotakone dot com), released under the MIT license
+= Copyrights
+
+Copyright (c) 2009 Mikhail Lapshin (sotakone at sotakone dot com), released under the MIT license.
+
+Feel free to mail me with any questions about this plugin.
