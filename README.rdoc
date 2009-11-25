@@ -2,7 +2,7 @@
 
 Magic Numbers is a simple Rails plugin which brings transparent enums
 and sets (bitfields) to AR objects. It doesn't require native database
-support of enums or sets, instead of this it stores values as plain
+support for enums or sets, instead of this it stores values as plain
 integers.
 
 == Example
@@ -25,7 +25,7 @@ After this you can set user's state with symbols or strings:
   @user.state
   # => :deleted
 
-  @user[:state]  # In such way we can get value which will actually be written in DB
+  @user[:state]  # In such way you can get value which will actually be stored in DB
   # => 2
 
 And you can work with bitfield attributes as regular arrays:
@@ -46,16 +46,18 @@ And you can work with bitfield attributes as regular arrays:
 
 ==  Getting magic numbers for specified values
 
-Sometimes (for example, for search queries) you need magic numbers
-which corresponds to your values. You can use +magic_number_for+
-method, i.e.:
+Sometimes (for example, in search queries) you need to get magic
+numbers which corresponds to specific values. You can use
++magic_number_for+ method for this, i.e.:
 
   deleted_users = @user.find(:all, :conditions => { :state => User.magic_number_for(:state, :deleted) })
 
 Also you can get entire magic number attribute options hash by it's name:
 
   User.magic_number_attribute_options(:state)
-  # => { :type => :enum, :values => [:passive, :active, :deleted], :stringified_values => ["passive", "active", "deleted"] }
+  # => { :type               => :enum,
+         :values             => [:passive,  :active,  :deleted],
+         :stringified_values => ["passive", "active", "deleted"] }
 
 == Handling of incorrect values
 
