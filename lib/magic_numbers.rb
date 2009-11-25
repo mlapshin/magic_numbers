@@ -91,6 +91,8 @@ module ActiveRecord
       def magic_number_write(name, new_value)
         attribute_options = self.class.magic_number_attribute_options(name)
         self[name] = self.class.magic_number_for(name, new_value)
+
+        new_value
       end
 
     end
