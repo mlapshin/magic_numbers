@@ -4,8 +4,8 @@ setup_db
 
 class Foo < ActiveRecord::Base
 
-  enum_column     :state, :values => [:active, :pending, :passive, :deleted]
-  bitfield_column :roles, :values => [:user, :administrator, :moderator]
+  enum_attribute     :state, :values => [:active, :pending, :passive, :deleted]
+  bitfield_attribute :roles, :values => [:user, :administrator, :moderator]
 
 end
 
@@ -16,7 +16,7 @@ class MagicNumbersTest < ActiveSupport::TestCase
                    :roles => [:administrator, :user])
   end
 
-  test "should correctly handle enum and bitfield columns" do
+  test "should correctly handle enum and bitfield attributes" do
     assert @foo.save
     assert_equal 2, @foo[:state]
     assert_equal 3, @foo[:roles]
@@ -32,7 +32,7 @@ class MagicNumbersTest < ActiveSupport::TestCase
     assert_equal [:user, :administrator], @foo.roles
   end
 
-  test "should preserve values order in bitfield column" do
+  test "should preserve values order in bitfield attribute" do
     @foo.roles = ['administrator', :moderator, 'user']
     assert_equal [:user, :administrator, :moderator], @foo.roles
   end
@@ -43,7 +43,8 @@ class MagicNumbersTest < ActiveSupport::TestCase
   end
 
   test "should correctly report magic numbers for specified values" do
-    assert_equal 3, Foo.magic_number_for(:roles, [:administrator, :user, 'aalsdkajajs'])
+    assert_equal 3, Foo.magic_number_for(:roles, [:administrator, :user, nil, 'aalsdkajajs'])
+    assert_equal 0, Foo.magic_number_for(:roles, [])
     assert_equal 1, Foo.magic_number_for(:state, 'pending')
 
     assert_nil Foo.magic_number_for(:state, 'invalid state value')
