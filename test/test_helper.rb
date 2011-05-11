@@ -3,7 +3,7 @@ require 'active_support'
 require 'active_support/test_case'
 require 'active_record'
 require 'active_record/magic_numbers'
-require 'init'
+require File.dirname(__FILE__) + "/../init"
 require 'test/unit'
 
 ActiveRecord::Base.establish_connection(:adapter => "sqlite3", :database => ":memory:")

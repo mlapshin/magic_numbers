@@ -4,6 +4,10 @@ module ActiveRecord
     def self.included(base)
       base.extend(ClassMethods)
       base.send(:include, InstanceMethods)
+
+      base.instance_eval do
+        class_attribute :magic_number_attributes, :instance_writer => false
+      end
     end
 
     module ClassMethods
@@ -38,7 +42,7 @@ module ActiveRecord
       end
 
       def magic_number_attribute_options(name)
-        magic_number_attributes = read_inheritable_attribute(:magic_number_attributes) || {}
+        magic_number_attributes = self.magic_number_attributes || {}
 
         if magic_number_attributes.include?(name)
           magic_number_attributes[name]
@@ -57,12 +61,12 @@ module ActiveRecord
       end
 
       def magic_number_attribute(name, options = {})
-        magic_number_attributes = read_inheritable_attribute(:magic_number_attributes) || {}
+        magic_number_attributes = self.magic_number_attributes || {}
         options.assert_valid_keys(:values, :type)
 
         options[:stringified_values] = options[:values].map { |v| v.to_s }
         magic_number_attributes[name] = options
-        write_inheritable_attribute(:magic_number_attributes, magic_number_attributes)
+        self.magic_number_attributes = magic_number_attributes
         magic_number_accessors(name)
       end
 
