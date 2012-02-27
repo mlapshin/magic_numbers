@@ -47,23 +47,25 @@ module MagicNumbers
         end
       end
 
-    protected
+      protected
 
-      def magic_number_accessors(name)
+      def magic_number_accessors(name, accessor)
         class_eval <<-EOE
-          def #{name}; magic_number_read(:#{name}); end
-          def #{name}=(new_value); magic_number_write(:#{name}, new_value); end
+          def #{accessor}; magic_number_read(:#{name}); end
+          def #{accessor}=(new_value); magic_number_write(:#{name}, new_value); end
         EOE
       end
 
       def magic_number_attribute(name, options = {})
         magic_number_attributes = self.magic_number_attributes || {}
-        options.assert_valid_keys(:values, :type)
+        options.assert_valid_keys(:values, :type, :as)
 
-        options[:stringified_values] = options[:values].map { |v| v.to_s }
+        options[:stringified_values] = options[:values].map(&:to_s)
+        options[:as] = options[:as] || name
+        
         magic_number_attributes[name] = options
         self.magic_number_attributes = magic_number_attributes
-        magic_number_accessors(name)
+        magic_number_accessors(name, options[:as])
       end
 
     end

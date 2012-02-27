@@ -71,6 +71,30 @@ Magic-numbered columns will handle all incorrect (unspecified) values as +nil+:
   @user.roles
   # => [:user]
 
+== Using with Sphinx
+
+In Sphinx indexed model you should specify alias for magic_numbers accessor. Using magic_numbers without an alias
+causes search errors because Sphinx implies that magic_numbers attribute value type is integer, but it is an array in 
+fact. 
+
+  class IndexedUser < ActiveRecord::Base
+    bitfield_attribute :roles, :values => [:user, :moderator, :administrator], :as => :magic_roles
+
+    define_index do
+      # ...
+    end
+  end
+
+  @user = IndexedUser.new
+  @user.magic_roles = [:user, :administrator]
+  @user.save!
+  
+  @user.roles
+  # => 3
+  @user.magic_roles
+  # [:user, :administrator]
+  
+
 == Copyrights
 
 Copyright (c) 2009 Mikhail Lapshin (sotakone at sotakone dot com), released under the MIT license.

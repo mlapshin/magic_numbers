@@ -17,6 +17,7 @@ def setup_db
     create_table :foos do |t|
       t.column :state, :integer
       t.column :roles, :integer
+      t.column :options, :integer      
     end
   end
 
