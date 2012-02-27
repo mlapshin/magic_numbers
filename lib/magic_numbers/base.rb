@@ -1,13 +1,9 @@
-module ActiveRecord
-  module MagicNumbers
-
-    def self.included(base)
-      base.extend(ClassMethods)
-      base.send(:include, InstanceMethods)
-
-      base.instance_eval do
-        class_attribute :magic_number_attributes, :instance_writer => false
-      end
+module MagicNumbers
+  module Base
+    extend ::ActiveSupport::Concern
+    
+    included do
+      class_attribute :magic_number_attributes, :instance_writer => false
     end
 
     module ClassMethods
@@ -72,33 +68,29 @@ module ActiveRecord
 
     end
 
-    module InstanceMethods
+    def magic_number_read(name)
+      attribute_options = self.class.magic_number_attribute_options(name)
 
-      def magic_number_read(name)
-        attribute_options = self.class.magic_number_attribute_options(name)
-
-        if attribute_options[:type] == :bitfield
-          unless self[name].nil?
-            attribute_options[:values].collect { |v| (self[name].to_i & (1 << attribute_options[:values].index(v))) > 0 ? v : nil }.compact
-          else
-            []
-          end
+      if attribute_options[:type] == :bitfield
+        unless self[name].nil?
+          attribute_options[:values].collect { |v| (self[name].to_i & (1 << attribute_options[:values].index(v))) > 0 ? v : nil }.compact
         else
-          unless self[name].nil?
-            attribute_options[:values][self[name]]
-          else
-            nil
-          end
+          []
+        end
+      else
+        unless self[name].nil?
+          attribute_options[:values][self[name]]
+        else
+          nil
         end
       end
+    end
 
-      def magic_number_write(name, new_value)
-        attribute_options = self.class.magic_number_attribute_options(name)
-        self[name] = self.class.magic_number_for(name, new_value)
+    def magic_number_write(name, new_value)
+      attribute_options = self.class.magic_number_attribute_options(name)
+      self[name] = self.class.magic_number_for(name, new_value)
 
-        new_value
-      end
-
+      new_value
     end
   end
 end
