@@ -1,3 +1,4 @@
+# encoding: utf-8
 module MagicNumbers
   class Railtie < ::Rails::Railtie
     ActiveSupport.on_load :active_record do

@@ -1,3 +1,4 @@
+# encoding: utf-8
 module MagicNumbers
   module Base
     extend ::ActiveSupport::Concern
