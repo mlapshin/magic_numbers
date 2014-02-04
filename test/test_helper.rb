@@ -2,8 +2,7 @@ require 'rubygems'
 require 'active_support'
 require 'active_support/test_case'
 require 'active_record'
-require 'active_record/magic_numbers'
-require File.dirname(__FILE__) + "/../init"
+require 'magic_numbers'
 require 'test/unit'
 
 ActiveRecord::Base.establish_connection(:adapter => "sqlite3", :database => ":memory:")
@@ -18,6 +17,7 @@ def setup_db
     create_table :foos do |t|
       t.column :state, :integer
       t.column :roles, :integer
+      t.column :options, :integer      
     end
   end
 

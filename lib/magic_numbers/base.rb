@@ -1,13 +1,10 @@
-module ActiveRecord
-  module MagicNumbers
-
-    def self.included(base)
-      base.extend(ClassMethods)
-      base.send(:include, InstanceMethods)
-
-      base.instance_eval do
-        class_attribute :magic_number_attributes, :instance_writer => false
-      end
+# encoding: utf-8
+module MagicNumbers
+  module Base
+    extend ::ActiveSupport::Concern
+    
+    included do
+      class_attribute :magic_number_attributes, :instance_writer => false
     end
 
     module ClassMethods
@@ -51,54 +48,52 @@ module ActiveRecord
         end
       end
 
-    protected
+      protected
 
-      def magic_number_accessors(name)
+      def magic_number_accessors(name, accessor)
         class_eval <<-EOE
-          def #{name}; magic_number_read(:#{name}); end
-          def #{name}=(new_value); magic_number_write(:#{name}, new_value); end
+          def #{accessor}; magic_number_read(:#{name}); end
+          def #{accessor}=(new_value); magic_number_write(:#{name}, new_value); end
         EOE
       end
 
       def magic_number_attribute(name, options = {})
         magic_number_attributes = self.magic_number_attributes || {}
-        options.assert_valid_keys(:values, :type)
+        options.assert_valid_keys(:values, :type, :as)
 
-        options[:stringified_values] = options[:values].map { |v| v.to_s }
+        options[:stringified_values] = options[:values].map(&:to_s)
+        options[:as] = options[:as] || name
+        
         magic_number_attributes[name] = options
         self.magic_number_attributes = magic_number_attributes
-        magic_number_accessors(name)
+        magic_number_accessors(name, options[:as])
       end
 
     end
 
-    module InstanceMethods
+    def magic_number_read(name)
+      attribute_options = self.class.magic_number_attribute_options(name)
 
-      def magic_number_read(name)
-        attribute_options = self.class.magic_number_attribute_options(name)
-
-        if attribute_options[:type] == :bitfield
-          unless self[name].nil?
-            attribute_options[:values].collect { |v| (self[name].to_i & (1 << attribute_options[:values].index(v))) > 0 ? v : nil }.compact
-          else
-            []
-          end
+      if attribute_options[:type] == :bitfield
+        unless self[name].nil?
+          attribute_options[:values].collect { |v| (self[name].to_i & (1 << attribute_options[:values].index(v))) > 0 ? v : nil }.compact
         else
-          unless self[name].nil?
-            attribute_options[:values][self[name]]
-          else
-            nil
-          end
+          []
+        end
+      else
+        unless self[name].nil?
+          attribute_options[:values][self[name]]
+        else
+          nil
         end
       end
+    end
 
-      def magic_number_write(name, new_value)
-        attribute_options = self.class.magic_number_attribute_options(name)
-        self[name] = self.class.magic_number_for(name, new_value)
+    def magic_number_write(name, new_value)
+      attribute_options = self.class.magic_number_attribute_options(name)
+      self[name] = self.class.magic_number_for(name, new_value)
 
-        new_value
-      end
-
+      new_value
     end
   end
 end

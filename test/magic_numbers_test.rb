@@ -6,6 +6,7 @@ class Foo < ActiveRecord::Base
 
   enum_attribute     :state, :values => [:active, :pending, :passive, :deleted]
   bitfield_attribute :roles, :values => [:user, :administrator, :moderator]
+  bitfield_attribute :options, :values => [:wide, :tall], :as => :options_mask
 
 end
 
@@ -58,4 +59,9 @@ class MagicNumbersTest < ActiveSupport::TestCase
     assert_nil Foo.magic_number_for(:state, 'invalid state value')
   end
 
+  test "should not hide base method if accessor assigned" do
+    @foo.options_mask = [:wide, :tall]
+    assert_equal [:wide, :tall], @foo.options_mask
+    assert_equal @foo.options, 3
+  end
 end

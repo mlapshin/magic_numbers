@@ -1,1 +1,4 @@
-rdoc
+*.gem
+.bundle
+Gemfile.lock
+pkg/*
